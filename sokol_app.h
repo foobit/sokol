@@ -1099,6 +1099,8 @@ typedef struct sapp_desc {
 
     int width;                          /* the preferred width of the window / canvas */
     int height;                         /* the preferred height of the window / canvas */
+    int min_width;                      /* minimum width of the window when resizing */
+    int min_height;                     /* minimum height of the window when resizing */
     int sample_count;                   /* MSAA sample count */
     int swap_interval;                  /* the preferred swap interval (ignored on some platforms) */
     bool high_dpi;                      /* whether the rendering canvas is full-resolution on HighDPI displays */
@@ -5868,6 +5870,20 @@ _SOKOL_PRIVATE LRESULT CALLBACK _sapp_win32_wndproc(HWND hWnd, UINT uMsg, WPARAM
                     }
                 }
                 break;
+            case WM_GETMINMAXINFO:
+                {
+                    RECT rect = { 0, 0, _sapp.desc.min_width, _sapp.desc.min_height };
+                    /* adjust the rect so the min sizes matches the client area. TODO: use AdjustWindowRectExForDpi */
+                    AdjustWindowRectEx(&rect, GetWindowLong(hWnd, GWL_STYLE), FALSE, GetWindowLong(hWnd, GWL_EXSTYLE));
+                    MINMAXINFO* mmi = (MINMAXINFO*)(lParam);
+                    if (_sapp.desc.min_width > 0) {
+                        mmi->ptMinTrackSize.x = rect.right - rect.left;
+                    }
+                    if (_sapp.desc.min_height > 0) {
+                        mmi->ptMinTrackSize.y = rect.bottom - rect.top;
+                    }
+                }
+                return 0;
             case WM_SETCURSOR:
                 if (_sapp.desc.user_cursor) {
                     if (LOWORD(lParam) == HTCLIENT) {
