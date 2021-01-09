@@ -3000,6 +3000,10 @@ _SOKOL_PRIVATE void _sapp_macos_frame(void) {
     _sapp.macos.window.acceptsMouseMovedEvents = YES;
     _sapp.macos.window.restorable = YES;
 
+    if (_sapp.desc.min_width > 0 && _sapp.desc.min_height > 0) {
+        [_sapp.macos.window contentMinSize:NSMakeSize(_sapp.desc.min_height, _sapp.desc.min_height)];
+    }
+
     _sapp.macos.win_dlg = [[_sapp_macos_window_delegate alloc] init];
     _sapp.macos.window.delegate = _sapp.macos.win_dlg;
     #if defined(SOKOL_METAL)
